@@ -4,12 +4,12 @@
 
 <br/>
 
-### *Una experiencia cinematográfica interactiva en Three.js*
+### *A cinematic interactive experience built with Three.js*
 
 <br/>
 
-*Olas que rompen en la arena. Palmeras meciéndose con la brisa.*
-*Un sol que se despide, y dos mil luciérnagas que no saben que la noche se acerca.*
+*Waves crashing on the shore. Palm trees swaying in the breeze.*
+*A sun saying goodbye, and two thousand fireflies that don't know night is coming.*
 
 <br/>
 
@@ -18,33 +18,37 @@
 ![GLSL](https://img.shields.io/badge/GLSL-ES_3.0-5586C4)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
+<br/>
+
+![Sunset Beach Preview](public/img/preview.png)
+
 </div>
 
 ---
 
 <br/>
 
-## Índice
+## Index
 
 <details>
-<summary><strong>Explorar secciones</strong></summary>
+<summary><strong>Explore sections</strong></summary>
 
 <br/>
 
-1. [La visión](#-la-visión)
-2. [Cómo funciona](#-cómo-funciona)
-3. [Decisiones técnicas](#-decisiones-técnicas)
-4. [Arquitectura](#-arquitectura)
-5. [Shaders GLSL](#-shaders-glsl)
-6. [Pipeline de renderizado](#-pipeline-de-renderizado)
-7. [Rendimiento](#-rendimiento)
-8. [Instalación](#-instalación)
-9. [Controles](#-controles)
-10. [Personalización](#-personalización)
-11. [Soporte del navegador](#-soporte-del-navegador)
-12. [Contribuir](#-contribuir)
-13. [Créditos](#-créditos)
-14. [Licencia](#-licencia)
+1. [The Vision](#-the-vision)
+2. [How It Works](#-how-it-works)
+3. [Technical Decisions](#-technical-decisions)
+4. [Architecture](#-architecture)
+5. [GLSL Shaders](#-glsl-shaders)
+6. [Render Pipeline](#-render-pipeline)
+7. [Performance](#-performance)
+8. [Installation](#-installation)
+9. [Controls](#-controls)
+10. [Customization](#-customization)
+11. [Browser Support](#-browser-support)
+12. [Contributing](#-contributing)
+13. [Credits](#-credits)
+14. [License](#-license)
 
 </details>
 
@@ -52,169 +56,169 @@
 
 <br/>
 
-## 🎬 La visión
+## 🎬 The Vision
 
-> *No es un demo de Three.js. Es un momento suspendido en el tiempo.*
+> *It's not a Three.js demo. It's a moment suspended in time.*
 
-Sunset Beach captura esa instancia efímera en la que el sol toca el horizonte y todo se tiñe de dorado. Las olas rompen con paciencia infinita, las palmeras susurran, y la arena guarda aún el calor del día.
+Sunset Beach captures that fleeting instant when the sun touches the horizon and everything turns golden. Waves break with infinite patience, palm trees whisper, and the sand still holds the warmth of the day.
 
-La escena no pretende ser realista — pretende *sentirse* real.
+The scene doesn't aim to be realistic — it aims to *feel* real.
 
-Cada shader, cada partícula, cada frame está diseñado para evocar una emoción: **calma, asombro, presencia**.
+Every shader, every particle, every frame is designed to evoke an emotion: **calm, wonder, presence**.
 
 <br/>
 
-### Capas de la escena
+### Layers of the Scene
 
 ```
-    ☁️  Cielo de atardecer
-    │   Nubes volumétricas iluminadas desde abajo
+    ☁️  Sunset Sky
+    │   Volumetric clouds lit from below
     │
-    🌊  Océano animado
-    │   Olas rompiendo · Espuma · Sun glint · Caustics
+    🌊  Animated Ocean
+    │   Breaking waves · Foam · Sun glint · Caustics
     │
-    🏖  Playa procedural
-    │   Arena seca/mojada · Conchas · Dunas · Marcas de marea
+    🏖  Procedural Beach
+    │   Dry/wet sand · Shells · Dunes · Tide marks
     │
-    🌴  Palmeras
-    │   Troncos curvados · Hojas con viento · Cocos
+    🌴  Palm Trees
+    │   Curved trunks · Wind-blown leaves · Coconuts
     │
-    ✨  Partículas
-        2000 luciérnagas doradas flotando
+    ✨  Particles
+        2000 golden fireflies floating
 ```
 
 ---
 
 <br/>
 
-## ⚙️ Cómo funciona
+## ⚙️ How It Works
 
-La experiencia se construye sobre **cinco sistemas fundamentales**, cada uno ejecutándose de forma independiente pero sincronizada en un loop de animación a 60 FPS.
+The experience is built on **five fundamental systems**, each running independently but synchronized in a 60 FPS animation loop.
 
-### 1. Terreno procedural
+### 1. Procedural Terrain
 
-Un plano de 60×60 unidades con 16,384 vértices. La elevación se calcula en el **vertex shader** usando ruido Simplex en múltiples frecuencias:
+A 60×60 unit plane with 16,384 vertices. Elevation is calculated in the **vertex shader** using Simplex noise across multiple frequencies:
 
 ```
-Arena (z < 0)          →  superficie plana que desciende hacia el mar
-Dunas (z > 5)          →  ondulaciones suaves con fbm
-Marcas de marea        →  relief sutil donde el agua toca la arena
+Beach (z < 0)          →  flat surface sloping toward the sea
+Dunes (z > 5)          →  gentle undulations with fbm
+Tide marks             →  subtle relief where water meets sand
 ```
 
-El **fragment shader** mezcla colores de arena seca y mojada basándose en la distancia al agua, añadiendo variación granular y conchas dispersas.
+The **fragment shader** blends dry and wet sand colors based on distance to water, adding granular variation and scattered shells.
 
-### 2. Océano animado
+### 2. Animated Ocean
 
-4 frecuencias de olas se combinan en el vertex shader:
+4 wave frequencies combine in the vertex shader:
 
-| Frecuencia | Propósito |
+| Frequency | Purpose |
 |---|---|
-| `0.3 rad/s` | Ola grande que se acerca a la orilla |
-| `1.5 rad/s` | Ola que se rompe en la costa |
-| `4.0 rad/s` | Chop pequeño (agitación superficial) |
-| `Ruido Simplex` | Forma orgánica irregular |
+| `0.3 rad/s` | Large wave approaching shore |
+| `1.5 rad/s` | Wave breaking at the coast |
+| `4.0 rad/s` | Small chop (surface agitation) |
+| `Simplex noise` | Organic irregular shape |
 
-El fragment shader calcula reflexión del cielo, sun glint specular, caustics bajo el agua, y espuma blanca donde las olas rompen.
+The fragment shader calculates sky reflection, specular sun glint, underwater caustics, and white foam where waves break.
 
-### 3. Cielo de atardecer
+### 3. Sunset Sky
 
-Una esfera de 200 radios con **BackSide rendering**. El fragment shader genera:
+A 200-radius sphere with **BackSide rendering**. The fragment shader generates:
 
-- Gradiente de 4 colores (horizonte → medio → zenit → suelo)
-- Nubes volumétricas con FBM noise
-- Iluminación lateral de nubes (silver lining)
-- Disco solar con halo y rayos horizontales
-- Reflejo del sol sobre el agua
+- 4-color gradient (horizon → mid → zenith → ground)
+- Volumetric clouds with FBM noise
+- Lateral cloud lighting (silver lining)
+- Sun disc with halo and horizontal rays
+- Sun reflection over the water
 
-### 4. Partículas GPU-instanciadas
+### 4. GPU-Instanced Particles
 
-2000 luciérnagas se renderizan con **un solo draw call** usando `InstancedMesh`. Cada partícula tiene:
+2000 fireflies rendered with **a single draw call** using `InstancedMesh`. Each particle has:
 
-- Posición, escala, velocidad y fase propias (atributos instanciados)
-- Movimiento flotante calculado en vertex shader
-- Pulso de brillo tipo luciérnaga en fragment shader
-- Color de la paleta cálida (dorado, naranja, crema)
+- Individual position, scale, speed, and phase (instanced attributes)
+- Floating movement calculated in vertex shader
+- Firefly-style brightness pulse in fragment shader
+- Warm palette colors (gold, orange, cream)
 
-### 5. Post-processing
+### 5. Post-Processing
 
-7 pasadas encadenadas en `EffectComposer`:
+7 passes chained in `EffectComposer`:
 
 ```
-Render → Bloom → God Rays → Chromatic Aberration → Viñeta → Color Grading → FXAA
+Render → Bloom → God Rays → Chromatic Aberration → Vignette → Color Grading → FXAA
 ```
 
-Cada pasada es un `ShaderPass` independiente que puede activarse o desactivarse.
+Each pass is an independent `ShaderPass` that can be toggled on or off.
 
 ---
 
 <br/>
 
-## 🔬 Decisiones técnicas
+## 🔬 Technical Decisions
 
-> *Por qué no se hizo de otra manera.*
+> *Why it wasn't done another way.*
 
-### ¿Por qué shaders custom en vez de materiales built-in?
+### Why custom shaders instead of built-in materials?
 
-Los materiales estándar de Three.js (`MeshStandardMaterial`, etc.) son excelentes para escenas PBR genéricas. Pero esta escena requiere:
+Three.js standard materials (`MeshStandardMaterial`, etc.) are great for generic PBR scenes. But this scene requires:
 
-- **Desplazamiento de vértices** animado en el terreno (wind ripple)
-- **Olas** que cambian de forma cada frame
-- **Mezcla de colores** basada en distancia al agua en tiempo real
-- **Nubes** generadas proceduralmente
+- **Animated vertex displacement** on the terrain (wind ripple)
+- **Waves** that change shape every frame
+- **Color blending** based on water distance in real time
+- **Clouds** generated procedurally
 
-Ninguno de estos es posible con materiales predefinidos sin resortes como `onBeforeCompile`, que dificultan el mantenimiento.
+None of these are possible with predefined materials without hacks like `onBeforeCompile`, which hurt maintainability.
 
-### ¿Por qué `InstancedMesh` para partículas?
+### Why `InstancedMesh` for particles?
 
-Crear 2000 `THREE.Mesh` individuales significaría 2000 draw calls por frame. Con `InstancedMesh`, todas las partículas se dibujan en **una sola llamada**. La animación se hace en el shader, no en JavaScript.
+Creating 2000 individual `THREE.Mesh` objects would mean 2000 draw calls per frame. With `InstancedMesh`, all particles render in **a single call**. Animation happens in the shader, not in JavaScript.
 
-### ¿Por qué `FogExp2` en vez de `Fog` lineal?
+### Why `FogExp2` instead of linear `Fog`?
 
-La niebla exponencial produce una caída más natural de visibilidad con la distancia. En una playa, la brisa salada crea exactamente este efecto: los objetos cercanos se ven nítidos, los lejanos se disuelven gradualmente.
+Exponential fog produces a more natural visibility falloff with distance. On a beach, salty mist creates exactly this effect: nearby objects are crisp, distant ones dissolve gradually.
 
-### ¿Por qué `OrbitControls` en vez de cámara animada?
+### Why `OrbitControls` instead of animated camera?
 
-Dar control al usuario crea una conexión más fuerte con la escena. El auto-rotate mantiene la sensación de movimiento cuando el usuario no interactúa, pero se detiene inmediatamente al tocar.
+Giving the user control creates a stronger connection with the scene. Auto-rotate maintains the sense of motion when idle, but stops immediately on interaction.
 
 ---
 
 <br/>
 
-## 🏗 Arquitectura
+## 🏗 Architecture
 
-Cada sistema es una **clase independiente** con un contrato claro:
+Each system is an **independent class** with a clear contract:
 
 ```javascript
-class Sistema {
+class System {
   constructor(scene, resourceManager) { /* init */ }
-  update(elapsedTime, delta) { /* cada frame */ }
-  dispose() { /* liberar recursos */ }
+  update(elapsedTime, delta) { /* every frame */ }
+  dispose() { /* free resources */ }
 }
 ```
 
-### Diagrama de módulos
+### Module Diagram
 
 ```
-main.js  ─────────────────── Orquestador
+main.js  ─────────────────── Orchestrator
     │
     ├── core/
-    │   ├── SceneManager.js       Escena · Cámara · Renderer
-    │   ├── PostProcessing.js     Pipeline de 7 pasadas
-    │   └── ResourceManager.js    Tracking y disposal de GPU resources
+    │   ├── SceneManager.js       Scene · Camera · Renderer
+    │   ├── PostProcessing.js     7-pass pipeline
+    │   └── ResourceManager.js    GPU resource tracking & disposal
     │
     ├── environment/
-    │   ├── Terrain.js            Playa procedural (GLSL)
-    │   ├── Water.js              Océano con olas (GLSL)
-    │   ├── Sky.js                Cielo de atardecer (GLSL)
-    │   └── Fog.js                Niebla volumétrica
+    │   ├── Terrain.js            Procedural beach (GLSL)
+    │   ├── Water.js              Ocean with waves (GLSL)
+    │   ├── Sky.js                Sunset sky (GLSL)
+    │   └── Fog.js                Volumetric fog
     │
     ├── lighting/
-    │   └── LightingManager.js    Sol · Hemisférico · Ambient · Contraluz
+    │   └── LightingManager.js    Sun · Hemisphere · Ambient · Backlight
     │
     ├── effects/
-    │   ├── Particles.js          Luciérnagas GPU-instanciadas
-    │   ├── Trees.js              Palmeras procedurales
-    │   └── Wind.js               Controlador de viento
+    │   ├── Particles.js          GPU-instanced fireflies
+    │   ├── Trees.js              Procedural palm trees
+    │   └── Wind.js               Wind controller
     │
     └── utils/
         └── Noise.js              Simplex 3D (CPU)
@@ -222,28 +226,28 @@ main.js  ─────────────────── Orquestador
 
 ### ResourceManager
 
-Todos los recursos GPU (geometrías, materiales, texturas, render targets) se registran al crearse y se liberan automáticamente en `beforeunload`:
+All GPU resources (geometries, materials, textures, render targets) are tracked on creation and automatically freed on `beforeunload`:
 
 ```javascript
 resourceManager.trackGeometry(geometry);
 resourceManager.trackMaterial(material);
 resourceManager.trackTexture(texture);
 // ...
-resourceManager.dispose();  // Libera todo de forma segura
+resourceManager.dispose();  // Safely frees everything
 ```
 
 ---
 
 <br/>
 
-## 🎨 Shaders GLSL
+## 🎨 GLSL Shaders
 
-Los shaders son el corazón de esta experiencia. Todo el movimiento visual ocurre en la GPU.
+Shaders are the heart of this experience. All visual movement happens on the GPU.
 
-### Arena — Desplazamiento multi-capa
+### Beach — Multi-layer displacement
 
 ```glsl
-// Vertex: 4 capas de ruido se combinan
+// Vertex: 4 noise layers combine
 float beachSlope  = smoothstep(-15.0, 20.0, pos.z) * 2.5;
 float dunes       = fbm(vec3(pos.x * 0.15, pos.z * 0.1, 0.0)) * 1.5;
 float tideMarks   = sin(pos.x * 3.0 + pos.z * 0.5) * 0.05 * tideMask;
@@ -252,49 +256,49 @@ float windRipple  = sin(windPhase) * uWindStrength * 0.02;
 pos.y = beachSlope + dunes + tideMarks + windRipple;
 ```
 
-### Agua — Olas de playa
+### Water — Beach waves
 
 ```glsl
-// 4 frecuencias + ruido orgánico
+// 4 frequencies + organic noise
 float approach   = sin(pos.x * 0.3 + uTime * 0.7) * uWaveHeight;
 float breaking   = sin(pos.x * 1.5 + uTime * 1.5) * uWaveHeight * shoreProximity;
 float chop       = sin(pos.x * 4.0 + pos.z * 3.0 + uTime * 2.5) * 0.05;
 float noiseWave  = snoise(vec3(pos.x * 0.2, pos.z * 0.2, uTime * 0.3)) * 0.15;
 ```
 
-### Cielo — Nubes volumétricas
+### Sky — Volumetric clouds
 
 ```glsl
-// Iluminación lateral de nubes
+// Lateral cloud lighting
 float cloudSun = max(dot(normalize(cloudDir), normalize(uSunDirection)), 0.0);
-vec3 cloudLit  = mix(vec3(1.0, 0.45, 0.1),   // Lado iluminado
-                     vec3(0.25, 0.08, 0.15),   // Lado sombreado
+vec3 cloudLit  = mix(vec3(1.0, 0.45, 0.1),   // Lit side
+                     vec3(0.25, 0.08, 0.15),   // Shaded side
                      1.0 - pow(cloudSun, 0.4));
 
 // Silver lining
 float edgeGlow = pow(cloudSun, 10.0) * cloudDensity * 0.6;
 ```
 
-### Luciérnagas — Pulso de brillo
+### Fireflies — Brightness pulse
 
 ```glsl
-// Fragment: pulso exponencial
+// Fragment: exponential pulse
 float pulse = sin(t * 3.0 + aPhase * 5.0) * 0.5 + 0.5;
-pulse = pow(pulse, 3.0);  // Hace los pulsos más pronunciados
+pulse = pow(pulse, 3.0);  // Makes pulses more pronounced
 
-float core = exp(-dist * 12.0);   // Núcleo brillante
-float halo = exp(-dist * 4.0);    // Halo exterior suave
+float core = exp(-dist * 12.0);   // Bright core
+float halo = exp(-dist * 4.0);    // Soft outer halo
 ```
 
 ---
 
 <br/>
 
-## 🔧 Pipeline de renderizado
+## 🔧 Render Pipeline
 
 ```
 ┌──────────────────────────────────────────────────────────┐
-│  ESCENA                                                  │
+│  SCENE                                                   │
 │                                                          │
 │  ├─ Sky           BackSide · depthWrite: false · -1      │
 │  ├─ Terrain       ShaderMaterial · displacement          │
@@ -303,22 +307,22 @@ float halo = exp(-dist * 4.0);    // Halo exterior suave
 │  ├─ Particles     InstancedMesh · additive · order: 10   │
 │  └─ Fog           ShaderMaterial · normal blend          │
 │                                                          │
-│  ILUMINACIÓN                                              │
+│  LIGHTING                                                 │
 │                                                          │
-│  ├─ DirectionalLight    Sol · intensity: 1.2 · shadow    │
-│  ├─ HemisphereLight     Cielo/Arena · intensity: 0.4     │
-│  ├─ AmbientLight        Relleno · intensity: 0.3         │
-│  └─ DirectionalLight    Contraluz · intensity: 0.3       │
+│  ├─ DirectionalLight    Sun · intensity: 1.2 · shadow    │
+│  ├─ HemisphereLight     Sky/Sand · intensity: 0.4        │
+│  ├─ AmbientLight        Fill · intensity: 0.3            │
+│  └─ DirectionalLight    Backlight · intensity: 0.3       │
 ├──────────────────────────────────────────────────────────┤
 │  POST-PROCESSING (EffectComposer)                         │
 │                                                          │
-│  1. RenderPass           Escena completa                 │
-│  2. UnrealBloomPass      Brillo suave · 0.3 strength     │
-│  3. GodRaysShader        Rayos de luz · weight: 0.2      │
-│  4. ChromaticAberration  Separación RGB · 0.003          │
-│  5. VignetteShader       Enfoque al centro · 0.7         │
-│  6. ColorCorrection      Temperature cálida · 0.04       │
-│  7. FXAAShader           Anti-aliasing · último           │
+│  1. RenderPass           Full scene                      │
+│  2. UnrealBloomPass      Soft glow · 0.3 strength        │
+│  3. GodRaysShader        Light shafts · weight: 0.2      │
+│  4. ChromaticAberration  RGB separation · 0.003          │
+│  5. VignetteShader       Center focus · 0.7              │
+│  6. ColorCorrection      Warm temperature · 0.04         │
+│  7. FXAAShader           Anti-aliasing · last            │
 └──────────────────────────────────────────────────────────┘
 ```
 
@@ -326,169 +330,169 @@ float halo = exp(-dist * 4.0);    // Halo exterior suave
 
 <br/>
 
-## 🚀 Rendimiento
+## 🚀 Performance
 
-**Objetivo: 60 FPS constantes.**
+**Target: constant 60 FPS.**
 
-| Estrategia | Implementación |
+| Strategy | Implementation |
 |---|---|
-| GPU-first animation | Terreno, agua, cielo y partículas se animan íntegramente en shaders |
-| Instanced rendering | 2000 partículas → 1 draw call via `InstancedMesh` |
-| Pixel ratio cap | Limitado a `2` para evitar sobrecarga en Retina/4K |
-| Shadow budget | 2048px solo en el sol, sin sombras en elementos transparentes |
-| Zero allocations | Todos los `THREE.Vector3` se pre-asignan fuera del loop |
-| Frustum culling | Habilitado por defecto en Three.js |
-| Resource disposal | `ResourceManager` libera todo al descargar la página |
+| GPU-first animation | Terrain, water, sky and particles animate entirely in shaders |
+| Instanced rendering | 2000 particles → 1 draw call via `InstancedMesh` |
+| Pixel ratio cap | Limited to `2` to prevent Retina/4K overload |
+| Shadow budget | 2048px only on sun, no shadows on transparent elements |
+| Zero allocations | All `THREE.Vector3` pre-assigned outside the loop |
+| Frustum culling | Enabled by default in Three.js |
+| Resource disposal | `ResourceManager` frees everything on page unload |
 
-### Métricas típicas
+### Typical Metrics
 
-| Dispositivo | FPS | Draw calls | Triángulos |
+| Device | FPS | Draw Calls | Triangles |
 |---|---|---|---|
 | Desktop (GTX 1060+) | 60 | ~15 | ~50K |
 | Laptop (Intel UHD) | 45-60 | ~15 | ~50K |
 | Mobile (Snapdragon 8) | 30-45 | ~15 | ~50K |
 
-> **Tip:** En dispositivos de gama baja, reduce el shadow map a 1024px o desactiva god rays en `PostProcessing.js`.
+> **Tip:** On low-end devices, reduce shadow map to 1024px or disable god rays in `PostProcessing.js`.
 
 ---
 
 <br/>
 
-## 📦 Instalación
+## 📦 Installation
 
 ```bash
-# Clonar
-git clone https://github.com/tu-usuario/sunset-beach.git
+# Clone
+git clone https://github.com/your-user/sunset-beach.git
 cd sunset-beach
 
-# Instalar
+# Install
 npm install
 
-# Desarollar
+# Develop
 npm run dev
 ```
 
-El servidor arranca en `http://localhost:3000`.
+Server starts at `http://localhost:3000`.
 
 ### Scripts
 
-| Comando | Qué hace |
+| Command | What it does |
 |---|---|
-| `npm run dev` | Servidor de desarrollo con HMR |
-| `npm run build` | Build de producción → `dist/` |
-| `npm run preview` | Preview del build |
+| `npm run dev` | Development server with HMR |
+| `npm run build` | Production build → `dist/` |
+| `npm run preview` | Preview production build |
 
 ---
 
 <br/>
 
-## 🎮 Controles
+## 🎮 Controls
 
-| Acción | Desktop | Mobile |
+| Action | Desktop | Mobile |
 |---|---|---|
-| Rotar cámara | Click izq. + arrastrar | Un dedo + arrastrar |
-| Zoom | Rueda del ratón | Pinch |
-| Pan | Click der. + arrastrar | — |
-| Reset vista | Doble click | Doble toque |
+| Rotate camera | Left click + drag | One finger + drag |
+| Zoom | Mouse wheel | Pinch |
+| Pan | Right click + drag | — |
+| Reset view | Double click | Double tap |
 
-**Auto-rotate** activo a 0.3 rpm. Se detiene al interactuar, se reanuda tras 2s de inactividad.
+**Auto-rotate** active at 0.3 rpm. Stops on interaction, resumes after 2s of inactivity.
 
 ---
 
 <br/>
 
-## 🎨 Personalización
+## 🎨 Customization
 
-### Hora del día
+### Time of day
 
 ```javascript
 // LightingManager.js
-this.sunLight.position.set(-10, 6, -12);  // 🌅 Atardecer (default)
-this.sunLight.position.set(0, 15, 0);     // ☀️ Mediodía
-this.sunLight.position.set(10, 2, -5);    // 🌄 Amanecer
+this.sunLight.position.set(-10, 6, -12);  // 🌅 Sunset (default)
+this.sunLight.position.set(0, 15, 0);     // ☀️ Noon
+this.sunLight.position.set(10, 2, -5);    // 🌄 Dawn
 ```
 
-### Altura de las olas
+### Wave height
 
 ```glsl
 // shaders/water/vertex.glsl
-uniform float uWaveHeight;  // Default: 0.3 — sube para tormenta, baja para calma
+uniform float uWaveHeight;  // Default: 0.3 — raise for storm, lower for calm
 ```
 
-### Número de partículas
+### Particle count
 
 ```javascript
 // main.js
-this.particles = new Particles(scene, resourceManager, 3000);  // Más partículas
+this.particles = new Particles(scene, resourceManager, 3000);  // More particles
 ```
 
-### Modelo GLB personalizado
+### Custom GLB model
 
-Coloca tu archivo `.glb` en `public/models/scene.glb`. El sistema lo detecta automáticamente y lo integra en la escena.
+Place your `.glb` file at `public/models/scene.glb`. The system detects it automatically and integrates it into the scene.
 
 ---
 
 <br/>
 
-## 🌐 Soporte del navegador
+## 🌐 Browser Support
 
-| Navegador | Soporte |
+| Browser | Support |
 |---|---|
-| Chrome 90+ | ✅ Completo |
-| Firefox 90+ | ✅ Completo |
-| Safari 15+ | ✅ Completo |
-| Edge 90+ | ✅ Completo |
-| iOS Safari 15+ | ✅ Touch optimizado |
-| Chrome Android | ✅ Touch optimizado |
+| Chrome 90+ | ✅ Full |
+| Firefox 90+ | ✅ Full |
+| Safari 15+ | ✅ Full |
+| Edge 90+ | ✅ Full |
+| iOS Safari 15+ | ✅ Touch optimized |
+| Chrome Android | ✅ Touch optimized |
 
-**Requisitos:** WebGL 2.0 habilitado. La mayoría de navegadores modernos lo soportan por defecto.
+**Requirements:** WebGL 2.0 enabled. Most modern browsers support it by default.
 
 ---
 
 <br/>
 
-## 🤝 Contribuir
+## 🤝 Contributing
 
-Las contribuciones son bienvenidas. Para cambios significativos, abre un issue primero para discutir la propuesta.
+Contributions are welcome. For significant changes, open an issue first to discuss the proposal.
 
 ```bash
-# 1. Fork el proyecto
-# 2. Crea una rama para tu feature
-git checkout -b feature/nueva-funcionalidad
+# 1. Fork the project
+# 2. Create a feature branch
+git checkout -b feature/new-feature
 
-# 3. Commit con mensaje descriptivo
-git commit -m "Agregar: sistema de mareas"
+# 3. Commit with descriptive message
+git commit -m "Add: tide system"
 
-# 4. Push a tu rama
-git push origin feature/nueva-funcionalidad
+# 4. Push to your branch
+git push origin feature/new-feature
 
-# 5. Abre un Pull Request
+# 5. Open a Pull Request
 ```
 
-### Convenciones
+### Conventions
 
-- **Commits:** formato [Conventional Commits](https://www.conventionalcommits.org/)
-- **Shaders:** documentar cada uniform con su propósito
-- **Módulos:** cada clase debe tener `constructor`, `update` y `dispose`
-
----
-
-<br/>
-
-## 🙏 Créditos
-
-- **[Three.js](https://threejs.org/)** — El motor WebGL que hace esto posible
-- **[Vite](https://vitejs.dev/)** — Desarrollo instantáneo
-- **[Simplex Noise](https://github.com/ashima/webgl-noise)** — Algoritmo de ruido procedural
-- **[Three.js Examples](https://github.com/mrdoob/three.js/tree/dev/examples/jsm)** — Post-processing, loaders, controles
+- **Commits:** [Conventional Commits](https://www.conventionalcommits.org/) format
+- **Shaders:** document every uniform with its purpose
+- **Modules:** every class must have `constructor`, `update` and `dispose`
 
 ---
 
 <br/>
 
-## 📄 Licencia
+## 🙏 Credits
 
-MIT License — Usa este proyecto como quieras.
+- **[Three.js](https://threejs.org/)** — The WebGL engine that makes this possible
+- **[Vite](https://vitejs.dev/)** — Instant development
+- **[Simplex Noise](https://github.com/ashima/webgl-noise)** — Procedural noise algorithm
+- **[Three.js Examples](https://github.com/mrdoob/three.js/tree/dev/examples/jsm)** — Post-processing, loaders, controls
+
+---
+
+<br/>
+
+## 📄 License
+
+MIT License — Use this project however you want.
 
 ```
 Permission is hereby granted, free of charge, to any person obtaining
@@ -501,10 +505,10 @@ a copy of this software and associated documentation files.
 
 <div align="center">
 
-*Construido con pasión, pixels y un poco de luz dorada.*
+*Built with passion, pixels, and a little golden light.*
 
 <br/>
 
-**[⬆ Volver al inicio](#-sunset-beach)**
+**[⬆ Back to top](#-sunset-beach)**
 
 </div>
