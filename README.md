@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌅 Sunset Beach
+# 🏝️🌅 Sunset Beach
 
 <br/>
 
@@ -56,7 +56,7 @@
 
 <br/>
 
-## 🎬 The Vision
+## The Vision
 
 > *It's not a Three.js demo. It's a moment suspended in time.*
 
@@ -91,7 +91,7 @@ Every shader, every particle, every frame is designed to evoke an emotion: **cal
 
 <br/>
 
-## ⚙️ How It Works
+## How It Works
 
 The experience is built on **five fundamental systems**, each running independently but synchronized in a 60 FPS animation loop.
 
@@ -153,7 +153,7 @@ Each pass is an independent `ShaderPass` that can be toggled on or off.
 
 <br/>
 
-## 🔬 Technical Decisions
+## Technical Decisions
 
 > *Why it wasn't done another way.*
 
@@ -184,7 +184,7 @@ Giving the user control creates a stronger connection with the scene. Auto-rotat
 
 <br/>
 
-## 🏗 Architecture
+## Architecture
 
 Each system is an **independent class** with a clear contract:
 
@@ -240,7 +240,7 @@ resourceManager.dispose();  // Safely frees everything
 
 <br/>
 
-## 🎨 GLSL Shaders
+## GLSL Shaders
 
 Shaders are the heart of this experience. All visual movement happens on the GPU.
 
@@ -294,7 +294,7 @@ float halo = exp(-dist * 4.0);    // Soft outer halo
 
 <br/>
 
-## 🔧 Render Pipeline
+## Render Pipeline
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -330,7 +330,7 @@ float halo = exp(-dist * 4.0);    // Soft outer halo
 
 <br/>
 
-## 🚀 Performance
+## Performance
 
 **Target: constant 60 FPS.**
 
@@ -358,7 +358,7 @@ float halo = exp(-dist * 4.0);    // Soft outer halo
 
 <br/>
 
-## 📦 Installation
+## Installation
 
 ```bash
 # Clone
@@ -386,7 +386,7 @@ Server starts at `http://localhost:3000`.
 
 <br/>
 
-## 🎮 Controls
+## Controls
 
 | Action | Desktop | Mobile |
 |---|---|---|
@@ -401,7 +401,7 @@ Server starts at `http://localhost:3000`.
 
 <br/>
 
-## 🎨 Customization
+## Customization
 
 ### Time of day
 
@@ -434,7 +434,7 @@ Place your `.glb` file at `public/models/scene.glb`. The system detects it autom
 
 <br/>
 
-## 🌐 Browser Support
+## Browser Support
 
 | Browser | Support |
 |---|---|
@@ -490,7 +490,7 @@ git push origin feature/new-feature
 
 <br/>
 
-## 📄 License
+## License
 
 MIT License — Use this project however you want.
 
@@ -505,10 +505,12 @@ a copy of this software and associated documentation files.
 
 <div align="center">
 
-*Built with passion, pixels, and a little golden light.*
+
+**[⬆ Back to top](#-sunset-beach)**
 
 <br/>
 
-**[⬆ Back to top](#-sunset-beach)**
+Made with ❤️ by <a href="https://sebas-dev.vercel.app/" target="_blank" rel="noopener noreferrer">Sebastián V</a>
+
 
 </div>
