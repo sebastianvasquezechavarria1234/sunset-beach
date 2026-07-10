@@ -5,11 +5,10 @@
 
 # 🏝️🌅 Sunset Beach
 
-<br/>
 
 ### *A cinematic interactive experience built with Three.js*
 
-<br/>
+
 
 *Waves crashing on the shore. Palm trees swaying in the breeze.*
 *A sun saying goodbye, and two thousand fireflies that don't know night is coming.*
@@ -451,7 +450,7 @@ Place your `.glb` file at `public/models/scene.glb`. The system detects it autom
 
 <br/>
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome. For significant changes, open an issue first to discuss the proposal.
 
@@ -479,7 +478,7 @@ git push origin feature/new-feature
 
 <br/>
 
-## 🙏 Credits
+## Credits
 
 - **[Three.js](https://threejs.org/)** — The WebGL engine that makes this possible
 - **[Vite](https://vitejs.dev/)** — Instant development
