@@ -3,7 +3,7 @@
 <br/>
 <div >
 
-# 🏝️🌅 Sunset Beach
+# Sunset Beach
 
 
 ### *A cinematic interactive experience built with Three.js*
@@ -14,12 +14,6 @@
 *A sun saying goodbye, and two thousand fireflies that don't know night is coming.*
 
 <br/>
-
-![Three.js](https://img.shields.io/badge/Three.js-v0.160-black?logo=three.js)
-![Vite](https://img.shields.io/badge/Vite-5.0-646CFF?logo=vite)
-![GLSL](https://img.shields.io/badge/GLSL-ES_3.0-5586C4)
-![License](https://img.shields.io/badge/License-MIT-green)
-
 
 </div>
 
