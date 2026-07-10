@@ -1,11 +1,11 @@
-// Sky Vertex Shader
-// Cúpula de cielo simple que pasa UV al fragment shader
-
+// Sky Vertex Shader - Cúpula con soporte para nubes
 varying vec2 vUv;
 varying vec3 vWorldPosition;
+varying vec3 vNormal;
 
 void main() {
   vUv = uv;
+  vNormal = normalize(normalMatrix * normal);
 
   vec4 worldPos = modelMatrix * vec4(position, 1.0);
   vWorldPosition = worldPos.xyz;

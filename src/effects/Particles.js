@@ -5,50 +5,54 @@ import particleFragmentShader from '../../shaders/particles/fragment.glsl?raw';
 
 /**
  * Particles - Sistema de partículas GPU-instanciado
- * Miles de partículas animadas completamente en GPU
- * Simula polvo/destello flotando en la luz del atardecer
+ * Luciérnagas mágicas que flotan y pulsan en la luz del atardecer
  */
 export class Particles {
-  constructor(scene, resourceManager, count = 2000) {
+  constructor(scene, resourceManager, count = 3000) {
     this.scene = scene;
     this.resourceManager = resourceManager;
     this.count = count;
 
-    // Generar datos de instancias (posición, escala, velocidad, fase)
+    // Datos de instancias
     const offsets = new Float32Array(count * 3);
     const scales = new Float32Array(count);
     const speeds = new Float32Array(count);
     const phases = new Float32Array(count);
+    const colors = new Float32Array(count * 3);
+
+    // Paleta de colores cálidos para las partículas
+    const colorPalette = [
+      new THREE.Color(0xffaa44), // Dorado
+      new THREE.Color(0xff8833), // Naranja
+      new THREE.Color(0xffcc66), // Amarillo claro
+      new THREE.Color(0xff6644), // Rojo-naranja
+      new THREE.Color(0xeedd88), // Crema
+    ];
 
     for (let i = 0; i < count; i++) {
-      // Posición aleatoria en un volumen grande
+      // Distribución en volumen
       offsets[i * 3] = (Math.random() - 0.5) * 50;
-      offsets[i * 3 + 1] = Math.random() * 12 - 2;
+      offsets[i * 3 + 1] = Math.random() * 14 - 2;
       offsets[i * 3 + 2] = (Math.random() - 0.5) * 50;
 
-      // Escala variada (algunas partículas más grandes que otras)
-      scales[i] = 0.3 + Math.random() * 1.5;
-
-      // Velocidad individual
-      speeds[i] = 0.2 + Math.random() * 0.8;
-
-      // Fase random para variación temporal
+      scales[i] = 0.2 + Math.random() * 1.8;
+      speeds[i] = 0.15 + Math.random() * 0.7;
       phases[i] = Math.random() * Math.PI * 2;
+
+      // Color aleatorio de la paleta
+      const c = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+      colors[i * 3] = c.r;
+      colors[i * 3 + 1] = c.g;
+      colors[i * 3 + 2] = c.b;
     }
 
-    // Geometría base: un quad pequeño (2 triángulos)
     const geometry = new THREE.BufferGeometry();
 
-    // Vertices de un quad centrado en origen
+    // Quad base
     const vertices = new Float32Array([
-      -0.5, -0.5, 0,
-       0.5, -0.5, 0,
-       0.5,  0.5, 0,
-      -0.5, -0.5, 0,
-       0.5,  0.5, 0,
-      -0.5,  0.5, 0
+      -0.5, -0.5, 0,  0.5, -0.5, 0,  0.5, 0.5, 0,
+      -0.5, -0.5, 0,  0.5, 0.5, 0,  -0.5, 0.5, 0
     ]);
-
     geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
 
     // Atributos instanciados
@@ -56,8 +60,8 @@ export class Particles {
     geometry.setAttribute('aScale', new THREE.InstancedBufferAttribute(scales, 1));
     geometry.setAttribute('aSpeed', new THREE.InstancedBufferAttribute(speeds, 1));
     geometry.setAttribute('aPhase', new THREE.InstancedBufferAttribute(phases, 1));
+    geometry.setAttribute('aColor', new THREE.InstancedBufferAttribute(colors, 3));
 
-    // Material con shaders custom
     this.material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -74,8 +78,8 @@ export class Particles {
 
     this.mesh = new THREE.InstancedMesh(geometry, this.material, count);
     this.mesh.name = 'particles';
-    this.mesh.frustumCulled = false; // Las partículas se mueven, no cull
-    this.mesh.renderOrder = 10; // Después de opacos
+    this.mesh.frustumCulled = false;
+    this.mesh.renderOrder = 10;
 
     this.scene.add(this.mesh);
 
@@ -83,11 +87,6 @@ export class Particles {
     this.resourceManager.trackMaterial(this.material);
   }
 
-  /**
-   * Actualiza las partículas cada frame
-   * @param {number} elapsedTime - Tiempo total
-   * @param {THREE.Vector3} cameraPosition - Posición actual de la cámara
-   */
   update(elapsedTime, cameraPosition) {
     this.material.uniforms.uTime.value = elapsedTime;
     this.material.uniforms.uCameraPosition.value.copy(cameraPosition);
