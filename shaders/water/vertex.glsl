@@ -1,15 +1,13 @@
-// Water Vertex Shader - Océano animado con olas realistas
+// Water Vertex Shader - OLAS DE PLAYA rompiendo en la orilla
 uniform float uTime;
 uniform float uWaveHeight;
-uniform vec2 uWindDirection;
 
 varying vec2 vUv;
 varying vec3 vNormal;
 varying vec3 vWorldPosition;
-varying vec3 vViewPosition;
-varying float vWaveHeight;
+varying float vWaveHeight_val;
+varying float vDistToShore;
 
-// Simplex noise
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 
@@ -60,29 +58,38 @@ void main() {
   vUv = uv;
   vec3 pos = position;
 
-  // Ola grande principal
-  float wave1 = sin(dot(pos.xz, uWindDirection) * 0.5 + uTime * 0.8) * uWaveHeight;
-  // Ola media
-  float wave2 = sin(pos.x * 0.8 + pos.z * 0.6 + uTime * 1.2) * uWaveHeight * 0.5;
-  // Ola pequeña (chop)
-  float wave3 = sin(pos.x * 2.5 + pos.z * 1.8 + uTime * 2.5) * uWaveHeight * 0.15;
-  // Gerstner-like cross waves
-  float wave4 = cos(pos.x * 1.2 - pos.z * 0.9 + uTime * 1.0) * uWaveHeight * 0.3;
+  // Distancia a la orilla (z = 0 es la línea de costa)
+  float shoreDist = pos.z;
+  vDistToShore = shoreDist;
 
-  float totalWave = wave1 + wave2 + wave3 + wave4;
+  // === Olas de playa ===
+  // Ola grande que se acerca a la orilla
+  float approach = sin(pos.x * 0.3 + uTime * 0.7) * uWaveHeight;
+  approach += sin(pos.x * 0.7 + uTime * 1.1) * uWaveHeight * 0.4;
 
-  // Añadir ruido para superficie más natural
-  float noiseWave = snoise(vec3(pos.x * 0.3, pos.z * 0.3, uTime * 0.4)) * uWaveHeight * 0.2;
+  // Ola que se rompe en la orilla (crece en altura cerca de la costa)
+  float shoreProximity = smoothstep(2.0, -3.0, shoreDist);
+  float breaking = sin(pos.x * 1.5 + uTime * 1.5) * uWaveHeight * 1.5 * shoreProximity;
 
-  pos.y += totalWave + noiseWave;
-  vWaveHeight = pos.y;
+  // Chop small
+  float chop = sin(pos.x * 4.0 + pos.z * 3.0 + uTime * 2.5) * 0.05;
 
-  // Calcular normales por diferencias finitas
+  // Ruido para forma orgánica
+  float noiseWave = snoise(vec3(pos.x * 0.2, pos.z * 0.2, uTime * 0.3)) * 0.15;
+
+  float totalWave = approach + breaking + chop + noiseWave;
+
+  // Las olas se aplastan al llegar a la playa
+  totalWave *= mix(1.0, 0.3, shoreProximity);
+
+  pos.y += totalWave;
+  vWaveHeight_val = pos.y;
+
+  // Normales
   float eps = 0.1;
-  float wx = sin((pos.x + eps) * 0.5 + pos.z * 0.3 + uTime * 0.8) * uWaveHeight
-           + sin((pos.x + eps) * 0.8 + pos.z * 0.6 + uTime * 1.2) * uWaveHeight * 0.5;
-  float wz = sin(pos.x * 0.5 + (pos.z + eps) * 0.3 + uTime * 0.8) * uWaveHeight
-           + sin(pos.x * 0.8 + (pos.z + eps) * 0.6 + uTime * 1.2) * uWaveHeight * 0.5;
+  float wx = sin((pos.x + eps) * 0.3 + uTime * 0.7) * uWaveHeight
+           + sin((pos.x + eps) * 1.5 + uTime * 1.5) * uWaveHeight * 1.5 * shoreProximity;
+  float wz = sin(pos.x * 0.3 + (pos.z + eps) * 0.3 + uTime * 0.7) * uWaveHeight;
 
   vec3 tangent = normalize(vec3(eps, wx - totalWave, 0.0));
   vec3 bitangent = normalize(vec3(0.0, wz - totalWave, eps));
@@ -90,7 +97,6 @@ void main() {
 
   vec4 worldPos = modelMatrix * vec4(pos, 1.0);
   vWorldPosition = worldPos.xyz;
-  vViewPosition = (modelViewMatrix * vec4(pos, 1.0)).xyz;
 
   gl_Position = projectionMatrix * viewMatrix * worldPos;
 }

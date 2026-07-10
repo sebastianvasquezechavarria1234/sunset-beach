@@ -1,22 +1,19 @@
 import * as THREE from 'three';
 
 /**
- * LightingManager - Sistema de iluminación cinematográfica de atardecer
- * Combina DirectionalLight (sol), HemisphereLight (cielo/suelo) y AmbientLight (relleno)
- * para lograr un look cálido y cinematográfico
+ * LightingManager - Iluminación de playa al atardecer
+ * Sol bajo y cálido, ambiente dorado, reflejos en el agua
  */
 export class LightingManager {
   constructor(scene, resourceManager) {
     this.scene = scene;
     this.resourceManager = resourceManager;
 
-    // === DireccionalLight: El sol de atardecer ===
-    // Color cálido naranja/dorado, intensidad alta para crear contraste dramático
-    this.sunLight = new THREE.DirectionalLight(0xffa040, 2.5);
-    this.sunLight.position.set(-15, 8, -10);
-    this.sunLight.target.position.set(0, 0, 0);
+    // === Sol de playa ===
+    this.sunLight = new THREE.DirectionalLight(0xff8833, 3.0);
+    this.sunLight.position.set(-8, 4, -15);
+    this.sunLight.target.position.set(0, 0, -5);
 
-    // Sombras: 2048px para calidad cinematográfica sin excesivo costo
     this.sunLight.castShadow = true;
     this.sunLight.shadow.mapSize.width = 2048;
     this.sunLight.shadow.mapSize.height = 2048;
@@ -32,39 +29,27 @@ export class LightingManager {
 
     this.scene.add(this.sunLight);
     this.scene.add(this.sunLight.target);
-    this.resourceManager.trackTexture(this.sunLight.shadow.map);
 
-    // === HemisphereLight: Gradiente cielo-suelo ===
-    // Simula la luz ambiental del cielo (azul frío arriba) y el suelo (cálido abajo)
-    this.hemiLight = new THREE.HemisphereLight(0x4466aa, 0x885533, 0.6);
+    // === HemisphereLight: cielo de playa ===
+    this.hemiLight = new THREE.HemisphereLight(0xff9955, 0x443322, 0.5);
     this.hemiLight.position.set(0, 20, 0);
     this.scene.add(this.hemiLight);
 
-    // === AmbientLight: Relleno suave ===
-    // Evita sombras completamente negras
-    this.ambientLight = new THREE.AmbientLight(0x221133, 0.3);
+    // === Ambient: relleno cálido ===
+    this.ambientLight = new THREE.AmbientLight(0x332211, 0.4);
     this.scene.add(this.ambientLight);
 
-    // === Luz de acento sutil (rim light) ===
-    // Añade un toque de luz desde atrás para separar objetos del fondo
-    this.rimLight = new THREE.DirectionalLight(0x6688cc, 0.4);
-    this.rimLight.position.set(10, 5, 15);
-    this.scene.add(this.rimLight);
+    // === Contraluz del sol (dorada) ===
+    this.backLight = new THREE.DirectionalLight(0xffcc88, 0.6);
+    this.backLight.position.set(8, 6, 15);
+    this.scene.add(this.backLight);
   }
 
-  /**
-   * Actualiza la iluminación basado en un factor de tiempo (0-1)
-   * Permite animar el ciclo de atardecer
-   * @param {number} t - Factor de tiempo (0 = atardecer temprano, 1 = atardecer tardío)
-   */
   update(t) {
-    // Animar posición del sol en un arco suave
     const angle = t * Math.PI;
-    this.sunLight.position.x = Math.cos(angle) * 20 - 5;
-    this.sunLight.position.y = Math.sin(angle) * 12 + 2;
-
-    // Variar intensidad del sol suavemente
-    this.sunLight.intensity = 2.0 + Math.sin(t * Math.PI) * 1.0;
+    this.sunLight.position.x = Math.cos(angle) * 15 - 3;
+    this.sunLight.position.y = Math.sin(angle) * 8 + 1;
+    this.sunLight.intensity = 2.5 + Math.sin(t * Math.PI) * 1.0;
   }
 
   dispose() {
@@ -72,6 +57,6 @@ export class LightingManager {
     this.scene.remove(this.sunLight.target);
     this.scene.remove(this.hemiLight);
     this.scene.remove(this.ambientLight);
-    this.scene.remove(this.rimLight);
+    this.scene.remove(this.backLight);
   }
 }

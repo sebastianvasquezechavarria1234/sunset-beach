@@ -1,4 +1,4 @@
-// Sky Fragment Shader - Cielo de atardecer dramático con nubes volumétricas
+// Sky Fragment Shader - ATARDECER DE PLAYA más cálido y vibrante
 uniform float uTime;
 uniform vec3 uSunDirection;
 
@@ -6,7 +6,6 @@ varying vec2 vUv;
 varying vec3 vWorldPosition;
 varying vec3 vNormal;
 
-// === Ruido Simplex 3D ===
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 
@@ -67,69 +66,78 @@ void main() {
   vec3 dir = normalize(vWorldPosition - cameraPosition);
   float y = dir.y;
 
-  // === Gradiente del cielo ===
-  vec3 horizonColor = vec3(0.85, 0.45, 0.15);  // Naranja atardecer
-  vec3 midColor = vec3(0.55, 0.2, 0.35);        // Púrpura
-  vec3 topColor = vec3(0.05, 0.08, 0.2);        // Azul oscuro
-  vec3 groundColor = vec3(0.02, 0.02, 0.04);    // Casi negro
+  // === Colores del atardecer de playa ===
+  vec3 horizonColor = vec3(1.0, 0.5, 0.1);      // Naranja intenso
+  vec3 warmGlow = vec3(1.0, 0.35, 0.05);         // Naranja rojo
+  vec3 midColor = vec3(0.6, 0.15, 0.25);         // Púrpura cálido
+  vec3 topColor = vec3(0.08, 0.05, 0.18);        // Azul profundo
+  vec3 groundColor = vec3(0.03, 0.02, 0.05);     // Casi negro
 
   vec3 skyColor;
   if (y > 0.0) {
-    float t = pow(y, 0.35);
-    skyColor = mix(horizonColor, midColor, smoothstep(0.0, 0.3, t));
-    skyColor = mix(skyColor, topColor, smoothstep(0.3, 1.0, t));
+    float t = pow(y, 0.3);
+    skyColor = mix(horizonColor, warmGlow, smoothstep(0.0, 0.15, t));
+    skyColor = mix(skyColor, midColor, smoothstep(0.15, 0.4, t));
+    skyColor = mix(skyColor, topColor, smoothstep(0.4, 1.0, t));
   } else {
-    float t = clamp(-y * 3.0, 0.0, 1.0);
+    float t = clamp(-y * 4.0, 0.0, 1.0);
     skyColor = mix(horizonColor, groundColor, t);
   }
 
-  // === Nubes volumétricas ===
+  // === Nubes de playa ===
   vec3 cloudDir = dir;
-  // Proyectar nubes en un plano lejano
   float cloudY = max(cloudDir.y, 0.001);
   vec2 cloudUV = cloudDir.xz / cloudY;
 
-  // Mover nubes con el tiempo
-  vec3 cloudNoisePos = vec3(cloudUV * 0.4 + uTime * 0.02, uTime * 0.01);
-
+  vec3 cloudNoisePos = vec3(cloudUV * 0.3 + uTime * 0.015, uTime * 0.008);
   float cloudDensity = fbm(cloudNoisePos);
-  cloudDensity = smoothstep(0.0, 0.6, cloudDensity);
+  cloudDensity = smoothstep(0.0, 0.55, cloudDensity);
 
-  // Iluminación de nubes por el sol
+  // Las nubes de playa son más alargadas horizontalmente
+  float cloudStretch = smoothstep(0.0, 0.3, abs(cloudDir.y));
+  cloudDensity *= cloudStretch;
+
+  // Iluminación de nubes
   float cloudSun = max(dot(normalize(cloudDir), normalize(uSunDirection)), 0.0);
-  vec3 cloudLight = mix(
-    vec3(0.9, 0.4, 0.15),  // Lado iluminado (naranja cálido)
-    vec3(0.3, 0.1, 0.2),   // Lado sombreado (púrpura oscuro)
-    1.0 - pow(cloudSun, 0.5)
+  vec3 cloudLit = mix(
+    vec3(1.0, 0.45, 0.1),   // Lado iluminado (naranja fuego)
+    vec3(0.25, 0.08, 0.15),  // Lado sombreado
+    1.0 - pow(cloudSun, 0.4)
   );
 
-  // Bordes de nubes más brillantes (silver lining)
-  float edgeGlow = pow(cloudSun, 8.0) * cloudDensity * 0.5;
-  cloudLight += vec3(1.0, 0.7, 0.3) * edgeGlow;
+  // Silver lining
+  float edgeGlow = pow(cloudSun, 10.0) * cloudDensity * 0.6;
+  cloudLit += vec3(1.0, 0.8, 0.4) * edgeGlow;
 
-  // Componer nubes
-  float cloudAlpha = cloudDensity * smoothstep(0.0, 0.15, y) * 0.7;
-  skyColor = mix(skyColor, cloudLight, cloudAlpha);
+  float cloudAlpha = cloudDensity * smoothstep(0.0, 0.1, y) * 0.65;
+  skyColor = mix(skyColor, cloudLit, cloudAlpha);
 
-  // === Disco solar ===
+  // === Sol ===
   vec3 sunDir = normalize(uSunDirection);
   float sunAngle = acos(clamp(dot(dir, sunDir), -1.0, 1.0));
 
-  // Núcleo brillante
-  float sunDisc = smoothstep(0.035, 0.005, sunAngle);
-  // Halo
-  float sunHalo = smoothstep(0.25, 0.0, sunAngle) * 0.5;
-  // Glow ambiental alrededor del sol
-  float sunGlow = smoothstep(0.8, 0.0, sunAngle) * 0.2;
-  // Rayos horizontales
-  float horizontalRay = pow(max(0.0, 1.0 - abs(dir.y)), 8.0) * sunGlow * 2.0;
+  // Sol grande de playa
+  float sunDisc = smoothstep(0.05, 0.01, sunAngle);
+  float sunHalo = smoothstep(0.35, 0.0, sunAngle) * 0.6;
+  float sunGlow = smoothstep(1.0, 0.0, sunAngle) * 0.25;
 
-  vec3 sunColor = vec3(1.0, 0.7, 0.3);
-  skyColor += sunColor * (sunDisc * 4.0 + sunHalo + sunGlow + horizontalRay);
+  // Rayos horizontales (reflejados en el agua)
+  float hRay = pow(max(0.0, 1.0 - abs(dir.y)), 10.0) * sunGlow * 3.0;
 
-  // === Brillo atmosférico cerca del horizonte ===
-  float horizonGlow = exp(-abs(y) * 4.0) * 0.3;
-  skyColor += vec3(0.8, 0.4, 0.15) * horizonGlow;
+  // Columna de sol sobre el agua (reflejo vertical)
+  float waterReflection = 0.0;
+  if (dir.y < 0.0) {
+    float reflAngle = abs(dir.x - sunDir.x);
+    waterReflection = exp(-reflAngle * 8.0) * exp(dir.y * 3.0) * 0.4;
+  }
+
+  vec3 sunColor = vec3(1.0, 0.65, 0.2);
+  skyColor += sunColor * (sunDisc * 5.0 + sunHalo + sunGlow + hRay);
+  skyColor += sunColor * waterReflection;
+
+  // Glow del horizonte
+  float horizonGlow = exp(-abs(y) * 5.0) * 0.4;
+  skyColor += vec3(1.0, 0.45, 0.1) * horizonGlow;
 
   gl_FragColor = vec4(skyColor, 1.0);
 }
