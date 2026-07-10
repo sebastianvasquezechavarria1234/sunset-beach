@@ -20,7 +20,7 @@
 
 <br/>
 
-![Sunset Beach Preview](public/img/preview.png)
+![Sunset Beach Preview](public/img/preview.jpg)
 
 </div>
 
