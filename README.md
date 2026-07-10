@@ -1,4 +1,7 @@
-<div align="center">
+
+![Sunset Beach Preview](public/img/preview.jpg)
+<br/>
+<div >
 
 # 🏝️🌅 Sunset Beach
 
@@ -18,9 +21,6 @@
 ![GLSL](https://img.shields.io/badge/GLSL-ES_3.0-5586C4)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-<br/>
-
-![Sunset Beach Preview](public/img/preview.jpg)
 
 </div>
 
