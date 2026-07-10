@@ -13,7 +13,6 @@
 *Waves crashing on the shore. Palm trees swaying in the breeze.*
 *A sun saying goodbye, and two thousand fireflies that don't know night is coming.*
 
-<br/>
 
 </div>
 
