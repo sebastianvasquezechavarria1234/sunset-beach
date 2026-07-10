@@ -69,9 +69,9 @@ export class PostProcessing {
 
           for (int i = 0; i < 50; i++) {
             texCoord -= deltaTextCoord;
-            vec4 sample = texture2D(tDiffuse, texCoord);
-            sample *= illumination * uWeight;
-            accum += sample;
+            vec4 texSample = texture2D(tDiffuse, texCoord);
+            texSample *= illumination * uWeight;
+            accum += texSample;
             illumination *= uDecay;
           }
 
