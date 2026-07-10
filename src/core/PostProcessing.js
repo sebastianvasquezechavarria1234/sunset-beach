@@ -23,24 +23,24 @@ export class PostProcessing {
     // 1. Render de escena
     this.composer.addPass(new RenderPass(scene, camera));
 
-    // 2. Bloom dramático
+    // 2. Bloom suave (brillo natural, no excesivo)
     this.bloomPass = new UnrealBloomPass(
       size,
-      0.6,    // strength
-      0.5,    // radius
-      0.7     // threshold
+      0.3,    // strength - bajo para look natural
+      0.6,    // radius - suave
+      0.8     // threshold - solo áreas muy brillantes
     );
     this.composer.addPass(this.bloomPass);
 
-    // 3. God Rays (rayos de luz volumétricos)
+    // 3. God Rays sutiles
     this.godRaysPass = new ShaderPass({
       uniforms: {
         tDiffuse: { value: null },
-        uLightPosition: { value: new THREE.Vector2(0.3, 0.6) },
-        uExposure: { value: 1.0 },
-        uDecay: { value: 0.96 },
-        uDensity: { value: 1.2 },
-        uWeight: { value: 0.4 }
+        uLightPosition: { value: new THREE.Vector2(0.35, 0.55) },
+        uExposure: { value: 0.8 },
+        uDecay: { value: 0.98 },
+        uDensity: { value: 0.8 },
+        uWeight: { value: 0.2 }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -115,12 +115,12 @@ export class PostProcessing {
     });
     this.composer.addPass(this.chromaPass);
 
-    // 5. Viñeta cinematográfica
+    // 5. Viñeta sutil
     this.vignettePass = new ShaderPass({
       uniforms: {
         tDiffuse: { value: null },
-        uIntensity: { value: 0.85 },
-        uSmoothness: { value: 0.5 }
+        uIntensity: { value: 0.7 },
+        uSmoothness: { value: 0.6 }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -147,15 +147,15 @@ export class PostProcessing {
     });
     this.composer.addPass(this.vignettePass);
 
-    // 6. Color Grading cinematográfico
+    // 6. Color Grading suave
     this.colorPass = new ShaderPass({
       uniforms: {
         tDiffuse: { value: null },
-        uBrightness: { value: 0.03 },
-        uContrast: { value: 1.2 },
-        uSaturation: { value: 1.15 },
-        uTemperature: { value: 0.1 },
-        uTint: { value: 0.03 }
+        uBrightness: { value: 0.01 },
+        uContrast: { value: 1.05 },
+        uSaturation: { value: 1.05 },
+        uTemperature: { value: 0.04 },
+        uTint: { value: 0.01 }
       },
       vertexShader: `
         varying vec2 vUv;

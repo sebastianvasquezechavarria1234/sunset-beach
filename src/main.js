@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 import { SceneManager } from './core/SceneManager.js';
 import { ResourceManager } from './core/ResourceManager.js';
@@ -14,7 +15,7 @@ import { Trees } from './effects/Trees.js';
 
 /**
  * Experience - Atardecer en la playa
- * Escena inmersiva con olas, arena, palmeras y partículas doradas
+ * Cámara controlada por el usuario con OrbitControls
  */
 class Experience {
   constructor() {
@@ -26,11 +27,6 @@ class Experience {
     this.loadingText = document.getElementById('loading-text');
     this.titleOverlay = document.getElementById('title-overlay');
 
-    this._cameraTarget = new THREE.Vector3();
-    this._cameraLookTarget = new THREE.Vector3();
-    this._mouse = new THREE.Vector2(0, 0);
-    this._mouseSmooth = new THREE.Vector2(0, 0);
-
     this.init();
   }
 
@@ -39,6 +35,7 @@ class Experience {
       this.updateLoadingText('Inicializando playa');
       this.updateLoading(5);
 
+      // === Core ===
       this.sceneManager = new SceneManager();
       this.resourceManager = new ResourceManager();
       this.postProcessing = new PostProcessing(
@@ -47,8 +44,28 @@ class Experience {
         this.sceneManager.camera
       );
 
-      // Niebla cálida de playa
-      this.sceneManager.scene.fog = new THREE.FogExp2(0x2a1510, 0.008);
+      // Niebla cálida suave de playa
+      this.sceneManager.scene.fog = new THREE.FogExp2(0x4a3020, 0.004);
+
+      // === OrbitControls ===
+      this.controls = new OrbitControls(
+        this.sceneManager.camera,
+        this.sceneManager.renderer.domElement
+      );
+      this.controls.enableDamping = true;
+      this.controls.dampingFactor = 0.05;
+      this.controls.rotateSpeed = 0.3;
+      this.controls.zoomSpeed = 0.5;
+      this.controls.minDistance = 5;
+      this.controls.maxDistance = 35;
+      this.controls.maxPolarAngle = Math.PI * 0.48;
+      this.controls.minPolarAngle = Math.PI * 0.15;
+      this.controls.target.set(0, 0.5, -3);
+      this.controls.autoRotate = true;
+      this.controls.autoRotateSpeed = 0.3;
+
+      // Posición inicial de cámara
+      this.sceneManager.camera.position.set(12, 4, 8);
 
       this.updateLoading(15);
       this.updateLoadingText('Pintando el cielo');
@@ -86,9 +103,6 @@ class Experience {
       this.updateLoading(80);
       this.updateLoadingText('Preparando experiencia');
 
-      this.setupMouse();
-      this.setupCamera();
-
       this.updateLoading(100);
       this.updateLoadingText('Listo');
 
@@ -99,51 +113,6 @@ class Experience {
       console.error('[Experience] Error:', error);
       this.updateLoadingText('Error al cargar');
     }
-  }
-
-  setupMouse() {
-    window.addEventListener('mousemove', (e) => {
-      this._mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-      this._mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-    });
-    window.addEventListener('touchmove', (e) => {
-      if (e.touches.length > 0) {
-        this._mouse.x = (e.touches[0].clientX / window.innerWidth) * 2 - 1;
-        this._mouse.y = -(e.touches[0].clientY / window.innerHeight) * 2 + 1;
-      }
-    }, { passive: true });
-  }
-
-  setupCamera() {
-    this.cameraAngle = 0;
-    this.cameraRadius = 14;
-    this.cameraHeight = 3.5;
-    this.cameraLookHeight = 0.8;
-    this.cameraSpeed = 0.04;
-  }
-
-  updateCamera(elapsed) {
-    this.cameraAngle = elapsed * this.cameraSpeed;
-
-    this._mouseSmooth.lerp(this._mouse, 0.03);
-
-    const mouseAngleOffset = this._mouseSmooth.x * 0.6;
-    const mouseHeightOffset = this._mouseSmooth.y * 1.2;
-
-    const angle = this.cameraAngle + mouseAngleOffset;
-    const x = Math.cos(angle) * this.cameraRadius;
-    const z = Math.sin(angle) * this.cameraRadius;
-
-    const breathe = Math.sin(elapsed * 0.2) * 0.15;
-    const y = this.cameraHeight + breathe + mouseHeightOffset;
-
-    this._cameraTarget.set(x, y, z);
-    this.sceneManager.camera.position.copy(this._cameraTarget);
-
-    const lookX = this._mouseSmooth.x * 1.0;
-    const lookZ = -3 + this._mouseSmooth.y * 0.8;
-    this._cameraLookTarget.set(lookX, this.cameraLookHeight, lookZ);
-    this.sceneManager.camera.lookAt(this._cameraLookTarget);
   }
 
   startExperience() {
@@ -167,14 +136,18 @@ class Experience {
     const delta = this.sceneManager.getDelta();
     const elapsed = this.sceneManager.getElapsedTime();
 
+    // Actualizar controles
+    this.controls.update();
+
+    // Actualizar sistemas
     this.terrain.update(elapsed);
     this.sky.update(elapsed);
     this.water.update(elapsed, this.sceneManager.camera.position);
     this.fog.update(elapsed);
     this.wind.update(delta, elapsed);
     this.particles.update(elapsed, this.sceneManager.camera.position);
-    this.lighting.update(0.5 + Math.sin(elapsed * 0.06) * 0.1);
-    this.updateCamera(elapsed);
+    this.lighting.update(0.5 + Math.sin(elapsed * 0.05) * 0.1);
+
     this.postProcessing.render();
   }
 }
